@@ -6,20 +6,18 @@ const app = express();
 // ✅ Configuración de CORS
 const corsOptions = {
   origin: [
+      "http://noralbag4.sg-host.com", // ✅ Tu dominio WordPress
     "http://localhost:3002",
-    "https://agentic-frontend.onrender.com"
+    "https://agentic-backend-v2.onrender.com"
   ],
   methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 };
-
 app.use(cors(corsOptions));
 
 // ✅ Opciones solo para rutas específicas (evita errores de path-to-regexp)
-app.options('/message', (req, res) => {
-  res.sendStatus(204);
-});
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
