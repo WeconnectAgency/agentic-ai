@@ -5,29 +5,30 @@ const ChatBot = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
+const handleSend = async () => {
+  if (!input.trim()) return;
 
-    try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/message`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ message: input }),
-});
+  try {
+    const response = await fetch("https://agentic-backend-v2.onrender.com/message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: input }),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      setMessages((prev) => [
-        ...prev,
-        { text: input, isUser: true },
-        { text: data.response, isUser: false },
-      ]);
+    setMessages((prev) => [
+      ...prev,
+      { text: input, isUser: true },
+      { text: data.reply, isUser: false }, // ⚠️ Usar 'reply', no 'response'
+    ]);
 
-      setInput("");
-    } catch (err) {
-      console.error("Error al enviar mensaje:", err);
-    }
-  };
+    setInput("");
+  } catch (err) {
+    console.error("Error al enviar mensaje:", err);
+  }
+};
+
 
   return (
     <div style={styles.chatContainer}>
