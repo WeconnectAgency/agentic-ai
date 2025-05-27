@@ -3,6 +3,10 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
+// Verificación de que la clave fue cargada correctamente
+console.log("🔍 Verificando API Key...");
+console.log("✅ Clave de OpenAI detectada:", process.env.OPENAI_API_KEY ? "Sí" : "❌ No detectada");
+
 app.use(cors());
 app.use(express.json());
 
