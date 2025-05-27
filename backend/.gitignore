@@ -1,2 +1,8 @@
-".env" 
+.env
 node_modules
+*.log
+*.test.js
+.DS_Store
+.cache
+build/
+dist/
