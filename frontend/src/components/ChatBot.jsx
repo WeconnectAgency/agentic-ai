@@ -9,11 +9,11 @@ const ChatBot = () => {
     if (!input.trim()) return;
 
     try {
-      const response = await fetch("https://agentic-frontend.onrender.com/message", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input }),
-      });
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/message`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ message: input }),
+});
 
       const data = await response.json();
 
