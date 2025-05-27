@@ -1,4 +1,7 @@
+require('dotenv').config(); // Asegura que cargue variables de entorno
+
 const OpenAI = require('openai');
+
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 module.exports = async (prompt) => {
@@ -10,9 +13,10 @@ module.exports = async (prompt) => {
                 { role: 'user', content: prompt }
             ],
         });
-        return completion.choices[0].message.content;
+
+        return completion.choices[0]?.message?.content || '[Sin respuesta]';
     } catch (error) {
-        console.error('Error en OpenAI:', error);
-        return 'Lo siento, hubo un error. Por favor intenta de nuevo.';
+        console.error('❌ Error al llamar a OpenAI:', error?.response?.data || error.message);
+        return 'Lo siento, hubo un error procesando tu solicitud. Intenta de nuevo más tarde.';
     }
 };
