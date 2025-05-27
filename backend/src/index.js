@@ -1,34 +1,43 @@
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+
 const app = express();
 
-// ✅ CONFIGURAR CORS para Render
-app.use(cors({
-  origin: "https://agentic-frontend.onrender.com", // solo acepta solicitudes de tu frontend
-}));
+const corsOptions = {
+  origin: ["http://localhost:3002", "https://agentic-frontend.onrender.com"],
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+};
+
+// ✅ CORS aplicado globalmente
+app.use(cors(corsOptions));
+
+// ✅ Corrección aquí: manejamos OPTIONS manualmente
+app.options('*', (req, res) => {
+  res.sendStatus(204);
+});
 
 app.use(express.json());
 
-// Verificación de que la clave fue cargada correctamente
-console.log("🔍 Verificando API Key...");
-console.log("✅ Clave de OpenAI detectada:", process.env.OPENAI_API_KEY ? "Sí" : "❌ No detectada");
-
-// Importar handler
-const ReActHandler = require('./ReActHandler');
-
-// Ruta principal
 app.post('/message', async (req, res) => {
-    try {
-        const response = await ReActHandler.processMessage(req.body.message);
-        res.json({ response });
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ error: 'Error interno' });
-    }
+  console.log("📩 Se recibió una solicitud POST a /message");
+
+  const message = req.body.message || '';
+  console.log("🧾 Contenido del mensaje recibido:", message);
+
+  res.json({ reply: `Recibido: ${message}` });
 });
 
-// Server
-app.listen(process.env.PORT, () => {
-    console.log(`Servidor en puerto ${process.env.PORT}`);
+
+const port = process.env.PORT || 3000;
+console.log("✅ Rutas registradas:");
+app._router.stack.forEach((r) => {
+  if (r.route && r.route.path) {
+    console.log(`→ ${r.route.path}`);
+  }
+});
+
+app.listen(port, () => {
+  console.log(`🚀 Servidor backend corriendo en puerto ${port}`);
 });
