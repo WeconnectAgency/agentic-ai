@@ -9,7 +9,7 @@ const handleSend = async () => {
   if (!input.trim()) return;
 
   try {
-    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/message`, {
+const response = await fetch("https://agentic-backend.onrender.com/message", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: input }),
