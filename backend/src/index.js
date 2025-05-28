@@ -12,7 +12,7 @@ const allowedOrigins = [
   'https://agentic-frontend.onrender.com'
 ];
 
-// 🔐 Configuración robusta de CORS
+// 🔐 Configuración CORS
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -24,15 +24,14 @@ const corsOptions = {
   },
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  optionsSuccessStatus: 204
+  credentials: true
 };
 
 // ✅ Middleware base
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// 🛡️ Inyección manual de headers CORS (GARANTIZADO)
+// 🛡️ Inyección manual de headers CORS
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
@@ -41,13 +40,19 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-
-  // ✅ Manejo especial para preflight
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(204);
-  }
-
   next();
+});
+
+// ✅ Manejo explícito de preflight para /message
+app.options('/message', (req, res) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  return res.sendStatus(204);
 });
 
 // ✅ Ruta principal
