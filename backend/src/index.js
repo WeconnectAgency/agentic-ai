@@ -6,9 +6,9 @@ const app = express();
 // ✅ Lista actualizada de dominios permitidos
 const allowedOrigins = [
   'http://localhost:3000',
+  'http://localhost:3002',
   'http://noralbag4.sg-host.com',
   'https://noralbag4.sg-host.com',
-  'http://localhost:3002',
   'https://agentic-frontend.onrender.com'
 ];
 
@@ -28,25 +28,18 @@ const corsOptions = {
   optionsSuccessStatus: 204
 };
 
+// ✅ CORS debe estar ANTES de las rutas
 app.use(cors(corsOptions));
 app.use(express.json());
-
-// ✅ Manejo correcto de preflight OPTIONS
 app.options('*', cors(corsOptions));
 
-// ✅ Ruta principal con manejo seguro de errores
+// ✅ Ruta principal
 app.post('/message', async (req, res) => {
   try {
     const message = req.body.message || '';
     res.json({ reply: `Recibido: ${message}` });
   } catch (error) {
     console.error("❌ Error interno:", error);
-
-    // 👇 CORS seguro para errores
-    const origin = req.headers.origin;
-    if (allowedOrigins.includes(origin)) {
-      res.header('Access-Control-Allow-Origin', origin);
-    }
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
