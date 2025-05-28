@@ -28,10 +28,27 @@ const corsOptions = {
   optionsSuccessStatus: 204
 };
 
-// ✅ CORS debe estar ANTES de las rutas
+// ✅ Middleware base
 app.use(cors(corsOptions));
 app.use(express.json());
-app.options('*', cors(corsOptions));
+
+// 🛡️ Inyección manual de headers CORS (GARANTIZADO)
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  // ✅ Manejo especial para preflight
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+
+  next();
+});
 
 // ✅ Ruta principal
 app.post('/message', async (req, res) => {
@@ -44,6 +61,7 @@ app.post('/message', async (req, res) => {
   }
 });
 
+// 🚀 Arranque del servidor
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`🚀 Servidor backend corriendo en puerto ${port}`);
