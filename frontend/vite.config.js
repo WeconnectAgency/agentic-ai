@@ -11,5 +11,8 @@ export default defineConfig({
     alias: {
       'react/jsx-runtime': path.resolve('./node_modules/react/jsx-runtime.js')
     }
+  },
+  optimizeDeps: {
+    exclude: ['react']  
   }
 });
