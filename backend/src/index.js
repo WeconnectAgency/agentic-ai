@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import { ReActHandler } from './modules/ReActHandler.js';
 import dotenv from 'dotenv';
 
@@ -7,6 +8,20 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 const reactHandler = new ReActHandler();
+
+// ✅ CONFIGURAR CORS CORRECTAMENTE
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3002',
+    'http://noralbag4.sg-host.com',
+    'https://noralbag4.sg-host.com',
+    'https://agentic-frontend.onrender.com'
+  ],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 
 app.use(express.json());
 
