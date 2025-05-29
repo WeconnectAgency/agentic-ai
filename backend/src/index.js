@@ -1,57 +1,41 @@
-const express = require('express');
-const cors = require('cors');
+import express from 'express';
+import { ReActHandler } from './modules/ReActHandler.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
+const port = process.env.PORT || 3000;
+const reactHandler = new ReActHandler();
 
-// ✅ Lista actualizada de dominios permitidos
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://noralbag4.sg-host.com',
-  'https://noralbag4.sg-host.com',
-  'http://localhost:3002',
-  'https://agentic-frontend.onrender.com'
-];
-
-// 🔐 Configuración robusta de CORS
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.error('🚨 Origen bloqueado por CORS:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  optionsSuccessStatus: 204
-};
-
-app.use(cors(corsOptions));
 app.use(express.json());
 
-// ✅ Manejo correcto de preflight OPTIONS
-app.options('*', cors(corsOptions));
+app.post('/chat', async (req, res) => {
+  const { message } = req.body;
+  
+  if (!message) {
+    return res.status(400).json({ error: "Mensaje requerido" });
+  }
 
-// ✅ Ruta principal con manejo seguro de errores
-app.post('/message', async (req, res) => {
   try {
-    const message = req.body.message || '';
-    res.json({ reply: `Recibido: ${message}` });
+    const startTime = Date.now();
+    const response = await reactHandler.manejarMensaje(message);
+    
+    // Simular tiempo de respuesta humano (1.5-3.5 segundos)
+    const elapsed = Date.now() - startTime;
+    const minDelay = 1500;
+    const delay = Math.max(minDelay - elapsed, 0) + Math.random() * 2000;
+    
+    setTimeout(() => {
+      res.json({ response });
+    }, delay);
+    
   } catch (error) {
-    console.error("❌ Error interno:", error);
-
-    // 👇 CORS seguro para errores
-    const origin = req.headers.origin;
-    if (allowedOrigins.includes(origin)) {
-      res.header('Access-Control-Allow-Origin', origin);
-    }
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error("Error en endpoint /chat:", error);
+    res.status(500).json({ error: "Error procesando mensaje" });
   }
 });
 
-const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`🚀 Servidor backend corriendo en puerto ${port}`);
+  console.log(`Servidor Alma Glamping escuchando en http://localhost:${port}`);
 });
