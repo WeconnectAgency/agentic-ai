@@ -1,10 +1,13 @@
 import { callOpenAI } from '../callOpenAI.js';
-import { ALMA_CONFIG } from '../../config/almaConfig.js';
+import { ALMA_CONFIG } from '../config/almaConfig.js';
 
 export async function detectarIntencionEmocion(userMessage, historial = []) {
   const prompt = `
-Contexto de Alma Glamping:
-${JSON.stringify(ALMA_CONFIG, null, 2)}
+Contexto de ${ALMA_CONFIG.NOMBRE_NEGOCIO}:
+- Ubicación: ${ALMA_CONFIG.POLITICAS.ubicacion}
+- Domos disponibles: ${Object.keys(ALMA_CONFIG.DOMOS).join(', ')}
+- Servicios: ${ALMA_CONFIG.SERVICIOS_ADICIONALES.map(s => s.nombre).join(', ')}
+- Valores: ${ALMA_CONFIG.VALORES.join(', ')}
 
 Analiza el mensaje del cliente:
 "${userMessage}"

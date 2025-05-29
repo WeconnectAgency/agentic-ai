@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
-import { ALMA_CONFIG } from '../config/almaConfig.js';
+import { ALMA_CONFIG } from './config/almaConfig.js';
 
 dotenv.config();
 

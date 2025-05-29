@@ -1,7 +1,7 @@
 import { callOpenAI } from '../callOpenAI.js';
 import { detectarIntencionEmocion } from './detectarIntencionEmocion.js';
 import { modularRespuesta } from './moduladorEmocional.js';
-import { ALMA_CONFIG } from '../../config/almaConfig.js';
+import { ALMA_CONFIG } from '../config/almaConfig.js';
 
 export class ReActHandler {
   constructor() {
@@ -13,7 +13,7 @@ export class ReActHandler {
     const analisis = await detectarIntencionEmocion(userMessage, this.historial);
     
     // Guardar detalles importantes
-    if (analisis.detalles) {
+    if (analisis.detalles && Object.keys(analisis.detalles).length > 0) {
       this.historial.push(analisis.detalles);
     }
 
@@ -30,7 +30,7 @@ export class ReActHandler {
   }
 
   async generarRespuestaConversacional(userMessage, analisis) {
-    const serviciosDisponibles = ALMA_CONFIG.SERVICIOS_ADICIONALES.join(', ');
+    const serviciosDisponibles = ALMA_CONFIG.SERVICIOS_ADICIONALES.map(s => s.nombre).join(', ');
     const tiposDomo = Object.keys(ALMA_CONFIG.DOMOS).map(d => `${d} ($${ALMA_CONFIG.DOMOS[d].precio})`).join(' o ');
     
     const prompt = `
@@ -55,7 +55,7 @@ ${this.historial.slice(-2).map(h => JSON.stringify(h)).join('\n')}
 Instrucciones:
 1. Usa lenguaje natural con pausas (...), contracciones y modismos
 2. Adapta tu tono a la emoción detectada
-3. Incorpora 1 elemento sensorial (vista, sonido, aroma)
+3. Incorpora 1 elemento sensorial (vista, sonido, aroma) de: ${ALMA_CONFIG.EXPERIENCIAS_CLAVE.join(', ')}
 4. Máximo 2 oraciones
 5. Aplica estrategia de venta sutil:
    ${this.obtenerEstrategiaVenta(analisis)}
@@ -82,10 +82,10 @@ Respuesta:
 
   agregarCierreNatural(respuesta, analisis) {
     const cierres = [
-      `¿Te gustaría reservar tu experiencia para ${analisis.detalles.fechas ? analisis.detalles.fechas[0] : 'estas fechas'}?`,
+      `¿Te gustaría reservar tu experiencia para ${analisis.detalles?.fechas ? analisis.detalles.fechas[0] : 'estas fechas'}?`,
       `¿Querés que te ayude a asegurar tu domo? Solo necesito ${ALMA_CONFIG.PROCESO_RESERVA}`,
       `¿Te interesaría que te envíe fotos reales de los domos disponibles?`,
-      `¿Preferís continuar por WhatsApp? Te puedo enviar más detalles al +506...`
+      `¿Preferís continuar por WhatsApp? Te puedo enviar más detalles al +506 XXXXXXX`
     ];
     
     return `${respuesta}... ${cierres[Math.floor(Math.random() * cierres.length)]}`;

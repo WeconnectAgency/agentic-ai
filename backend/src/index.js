@@ -37,5 +37,5 @@ app.post('/chat', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Servidor Alma Glamping escuchando en http://localhost:${port}`);
+  console.log(`Servidor ${process.env.APP_NAME || 'Alma Glamping'} escuchando en http://localhost:${port}`);
 });

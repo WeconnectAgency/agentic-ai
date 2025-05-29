@@ -1,6 +1,6 @@
-import { ALMA_CONFIG } from '../../config/almaConfig.js';
+import { ALMA_CONFIG } from '../config/almaConfig.js';
 
-export function modularRespuesta(respuestaBase, analisis) {
+export function modularRespuesta(respuestaBase, analisis, historial = []) {
   // Técnicas avanzadas de humanización
   const humanizar = {
     pausasNaturales: () => respuestaBase.replace(/\. /g, "... "),
@@ -16,14 +16,18 @@ export function modularRespuesta(respuestaBase, analisis) {
         ? errores[Math.floor(Math.random() * errores.length)] + respuestaBase
         : respuestaBase;
     },
-    memoriaConversacional: (historial) => {
-      if (historial.length > 2) {
-        const recuerdos = [
-          `¿Sigue siendo para ${historial[0].detalles.ocasion_especial}?`,
-          `¿${historial[0].detalles.nombre}, verdad?`,
-          `¿Sigues prefiriendo el ${historial[0].detalles.servicio_mencionado}?`
-        ];
-        return recuerdos[Math.floor(Math.random() * recuerdos.length)] + " " + respuestaBase;
+    memoriaConversacional: () => {
+      if (historial.length > 0) {
+        const ultimoDetalle = historial[historial.length - 1];
+        if (ultimoDetalle.ocasion_especial) {
+          return `¿Sigue siendo para ${ultimoDetalle.ocasion_especial}? ${respuestaBase}`;
+        }
+        if (ultimoDetalle.nombre) {
+          return `¿${ultimoDetalle.nombre}, verdad? ${respuestaBase}`;
+        }
+        if (ultimoDetalle.servicio_mencionado) {
+          return `¿Sigues prefiriendo el ${ultimoDetalle.servicio_mencionado}? ${respuestaBase}`;
+        }
       }
       return respuestaBase;
     }
@@ -34,6 +38,7 @@ export function modularRespuesta(respuestaBase, analisis) {
   respuesta = humanizar.pausasNaturales(respuesta);
   respuesta = humanizar.contracciones(respuesta);
   respuesta = humanizar.imperfeccionesControladas(respuesta);
+  respuesta = humanizar.memoriaConversacional(respuesta);
   
   // Añadir modismos locales
   if (Math.random() < 0.4) {
