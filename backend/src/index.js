@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const ReActHandler = require('./ReActHandler');
 
 const app = express();
 
@@ -26,7 +27,13 @@ app.post('/message', async (req, res) => {
   const message = req.body.message || '';
   console.log("🧾 Contenido del mensaje recibido:", message);
 
-  res.json({ reply: `Recibido: ${message}` });
+  try {
+    const reply = await ReActHandler.processMessage(message);
+    res.json({ reply });
+  } catch (error) {
+    console.error('❌ Error al procesar el mensaje:', error);
+    res.status(500).json({ error: 'Error interno al procesar el mensaje' });
+  }
 });
 
 
