@@ -1,22 +1,23 @@
 const detectarIntencionEmocion = require('./modules/detectarIntencionEmocion');
 const callOpenAI = require('./modules/callOpenAI');
-
-// Memoria temporal
-const sessionMemory = new Map();
+const { getSessionMemory, updateSessionMemory } = require('./sessionMemory');
 
 module.exports = {
-    async processMessage(userMessage) {
-        // 1. Analizar intención
+    async processMessage(userId, userMessage) {
+        const historial = await getSessionMemory(userId);
         const { intencion, emocion } = detectarIntencionEmocion(userMessage);
-        
-        // 2. Generar prompt
+
         const prompt = `
+        [Historial previo: ${historial.join('\n')}]
         [Intención: ${intencion}]
         [Emoción: ${emocion}]
         Usuario: ${userMessage}
         `;
 
-        // 3. Llamar a OpenAI
-        return await callOpenAI(prompt);
+        const respuesta = await callOpenAI(prompt);
+
+        await updateSessionMemory(userId, { mensaje: userMessage, intencion });
+
+        return respuesta;
     }
 };
