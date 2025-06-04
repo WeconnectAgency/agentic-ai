@@ -27,7 +27,7 @@ app.use(express.json());
 
 app.post('/chat', async (req, res) => {
   const { message } = req.body;
-  
+
   if (!message) {
     return res.status(400).json({ error: "Mensaje requerido" });
   }
@@ -35,19 +35,27 @@ app.post('/chat', async (req, res) => {
   try {
     const startTime = Date.now();
     const response = await reactHandler.manejarMensaje(message);
-    
+
     // Simular tiempo de respuesta humano (1.5-3.5 segundos)
     const elapsed = Date.now() - startTime;
     const minDelay = 1500;
     const delay = Math.max(minDelay - elapsed, 0) + Math.random() * 2000;
-    
+
     setTimeout(() => {
       res.json({ response });
     }, delay);
-    
+
   } catch (error) {
     console.error("Error en endpoint /chat:", error);
     res.status(500).json({ error: "Error procesando mensaje" });
+  }
+});
+
+// Opcional: mostrar rutas registradas
+console.log("✅ Rutas registradas:");
+app._router.stack.forEach((r) => {
+  if (r.route && r.route.path) {
+    console.log(`→ ${r.route.path}`);
   }
 });
 
