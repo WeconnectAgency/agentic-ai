@@ -12,7 +12,7 @@ export class ReActHandler {
   async manejarMensaje(userId, userMessage) {
     const historial = await getSessionMemory(userId);
     const analisis = await detectarIntencionEmocion(userMessage, historial);
-    
+
     // Guardar detalles importantes
     if (analisis.detalles && Object.keys(analisis.detalles).length > 0) {
       historial.push(analisis.detalles);
@@ -20,7 +20,7 @@ export class ReActHandler {
 
     let respuestaBase = await this.generarRespuestaConversacional(userMessage, analisis, historial);
     let respuestaFinal = modularRespuesta(respuestaBase, analisis, historial);
-    
+
     // Estrategia de cierre progresivo
     this.contadorCierres++;
     if (this.contadorCierres > 2 && analisis.intencion !== 'reserva') {
@@ -34,9 +34,9 @@ export class ReActHandler {
   async generarRespuestaConversacional(userMessage, analisis, historial) {
     const serviciosDisponibles = ALMA_CONFIG.SERVICIOS_ADICIONALES.map(s => s.nombre).join(', ');
     const tiposDomo = Object.keys(ALMA_CONFIG.DOMOS).map(d => `${d} ($${ALMA_CONFIG.DOMOS[d].precio})`).join(' o ');
-    
+
     const prompt = `
-Eres ${ALMA_CONFIG.NOMBRE_AGENTE}, asistente de ${ALMA_CONFIG.NOMBRE_NEGOCIO}. 
+Eres ${ALMA_CONFIG.NOMBRE_AGENTE}, asistente de ${ALMA_CONFIG.NOMBRE_NEGOCIO}.
 Características: ${ALMA_CONFIG.CARACTERISTICA_1}, ${ALMA_CONFIG.CARACTERISTICA_2}
 Modismos: ${ALMA_CONFIG.MODISMO_1}, ${ALMA_CONFIG.MODISMO_2}
 
@@ -66,7 +66,7 @@ Cliente dice: "${userMessage}"
 
 Respuesta:
     `;
-    
+
     return await callOpenAI(prompt, 0.7, 150);
   }
 
@@ -85,11 +85,11 @@ Respuesta:
   agregarCierreNatural(respuesta, analisis) {
     const cierres = [
       `¿Te gustaría reservar tu experiencia para ${analisis.detalles?.fechas ? analisis.detalles.fechas[0] : 'estas fechas'}?`,
-      `¿Querés que te ayude a asegurar tu domo? Solo necesito ${ALMA_CONFIG.PROCESO_RESERVA}`,
+      `¿Quers que te ayude a asegurar tu domo? Solo necesito ${ALMA_CONFIG.PROCESO_RESERVA}`,
       `¿Te interesaría que te envíe fotos reales de los domos disponibles?`,
-      `¿Preferís continuar por WhatsApp? Te puedo enviar más detalles al +506 XXXXXXX`
+      `¿Preferís continuar por WhatsApp? Te puedo enviar más detalles al +506 XXXXX`
     ];
-    
+
     return `${respuesta}... ${cierres[Math.floor(Math.random() * cierres.length)]}`;
   }
 }
