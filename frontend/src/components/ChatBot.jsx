@@ -20,7 +20,7 @@ const ChatBot = () => {
       setMessages((prev) => [
         ...prev,
         { text: input, isUser: true },
-        { text: data.response, isUser: false },
+        { text: data.reply, isUser: false },
       ]);
 
       setInput("");
