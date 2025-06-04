@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
+import mongoose from 'mongoose';
 import { ReActHandler } from './modules/ReActHandler.js';
+import { initSessionMemory } from './modules/sessionMemory.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -59,6 +61,19 @@ app._router.stack.forEach((r) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Servidor ${process.env.APP_NAME || 'Alma Glamping'} escuchando en http://localhost:${port}`);
-});
+
+async function startServer() {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log('✅ Connected to MongoDB');
+    await initSessionMemory();
+    console.log('✅ Session memory initialized');
+    app.listen(port, () => {
+      console.log(`Servidor ${process.env.APP_NAME || 'Alma Glamping'} escuchando en http://localhost:${port}`);
+    });
+  } catch (err) {
+    console.error('❌ MongoDB connection error:', err);
+  }
+}
+
+startServer();
