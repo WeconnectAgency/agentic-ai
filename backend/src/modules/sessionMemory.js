@@ -2,7 +2,14 @@ import mongoose from 'mongoose';
 
 const sessionSchema = new mongoose.Schema({
   userId: { type: String, required: true, unique: true },
-  history: [mongoose.Schema.Types.Mixed]
+  history: [mongoose.Schema.Types.Mixed],
+  ultimaRespuestaHora: { type: Date, default: Date.now },
+  historialMensajes: [{
+    role: String,
+    mensaje: String,
+    timestamp: { type: Date, default: Date.now }
+  }],
+  desaparecido: { type: Boolean, default: false }
 });
 
 const Session = mongoose.model('Session', sessionSchema);
@@ -30,5 +37,66 @@ export async function updateSessionMemory(userId, history) {
     ).exec();
   } catch (err) {
     console.error('Error updating session memory:', err);
+  }
+}
+
+export async function getContextoConversacion(userId) {
+  try {
+    const session = await Session.findOne({ userId }).exec();
+    if (!session) {
+      return {};
+    }
+    return {
+      historialMensajes: session.historialMensajes || [],
+      ultimaRespuestaHora: session.ultimaRespuestaHora,
+      desaparecido: session.desaparecido
+    };
+  } catch (err) {
+    console.error('Error getting contexto conversacional:', err);
+    return {};
+  }
+}
+
+export async function registrarMensaje(userId, role, mensaje) {
+  try {
+    await Session.findOneAndUpdate(
+      { userId },
+      {
+        $push: { historialMensajes: { role, mensaje, timestamp: new Date() } }
+      },
+      { upsert: true }
+    ).exec();
+  } catch (err) {
+    console.error('Error registrando mensaje:', err);
+  }
+}
+
+export async function actualizarUltimaHora(userId, timestamp = new Date()) {
+  try {
+    await Session.findOneAndUpdate(
+      { userId },
+      { ultimaRespuestaHora: timestamp, desaparecido: false },
+      { upsert: true }
+    ).exec();
+  } catch (err) {
+    console.error('Error actualizando ultima hora:', err);
+  }
+}
+
+export async function detectarDesaparicion(userId, minutos = 5) {
+  try {
+    const session = await Session.findOne({ userId }).exec();
+    if (!session || !session.ultimaRespuestaHora) return false;
+    const diffMin =
+      (Date.now() - new Date(session.ultimaRespuestaHora).getTime()) / 60000;
+    const desaparecido = diffMin > minutos;
+    if (session.desaparecido !== desaparecido) {
+      session.desaparecido = desaparecido;
+      await session.save();
+    }
+    return desaparecido;
+  } catch (err) {
+    console.error('Error detectando desaparicion:', err);
+    return false;
   }
 }
