@@ -1,32 +1,27 @@
 const express = require('express');
 const cors = require('cors');
+const ReActHandler = require('./ReActHandler');
 
 const app = express();
 
-const corsOptions = {
-  origin: ["http://localhost:3002", "https://agentic-frontend.onrender.com"],
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-};
-
-// ✅ CORS aplicado globalmente
-app.use(cors(corsOptions));
-
-// ✅ Corrección aquí: manejamos OPTIONS manualmente
-app.options('*', (req, res) => {
-  res.sendStatus(204);
-});
+// CORS abierto para cualquier origen
+app.use(cors());
 
 app.use(express.json());
 
 app.post('/message', async (req, res) => {
   console.log("📩 Se recibió una solicitud POST a /message");
 
-  const message = req.body.message || '';
-  console.log("🧾 Contenido del mensaje recibido:", message);
+  const { userId, message = '' } = req.body;
+  console.log("🧾 Contenido del mensaje recibido:", { userId, message });
 
-  res.json({ reply: `Recibido: ${message}` });
+  try {
+    const response = await ReActHandler.processMessage(userId, message);
+    res.json({ response });
+  } catch (error) {
+    console.error('❌ Error procesando mensaje:', error);
+    res.status(500).json({ error: 'Error procesando mensaje' });
+  }
 });
 
 
