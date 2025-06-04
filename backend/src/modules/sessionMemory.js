@@ -1,22 +1,33 @@
-import fs from 'fs/promises';
-const MEMORY_DIR = './memory';
+import mongoose from 'mongoose';
+
+const sessionSchema = new mongoose.Schema({
+  userId: { type: String, required: true, unique: true },
+  history: [mongoose.Schema.Types.Mixed]
+});
+
+const Session = mongoose.model('Session', sessionSchema);
+
+export function initSessionMemory() {
+  return Session.init();
+}
 
 export async function getSessionMemory(userId) {
   try {
-    const data = await fs.readFile(`${MEMORY_DIR}/${userId}.json`, 'utf8');
-    return JSON.parse(data);
+    const session = await Session.findOne({ userId }).exec();
+    return session ? session.history : [];
   } catch (err) {
+    console.error('Error getting session memory:', err);
     return [];
   }
 }
 
 export async function updateSessionMemory(userId, history) {
   try {
-    await fs.mkdir(MEMORY_DIR, { recursive: true });
-    await fs.writeFile(
-      `${MEMORY_DIR}/${userId}.json`,
-      JSON.stringify(history.slice(-10), null, 2)
-    );
+    await Session.findOneAndUpdate(
+      { userId },
+      { userId, history: history.slice(-10) },
+      { upsert: true }
+    ).exec();
   } catch (err) {
     console.error('Error updating session memory:', err);
   }
