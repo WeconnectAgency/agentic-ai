@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const { processMessage } = require('./ReActHandler');
 
 const app = express();
 
@@ -24,9 +25,16 @@ app.post('/message', async (req, res) => {
   console.log("📩 Se recibió una solicitud POST a /message");
 
   const message = req.body.message || '';
+  const userId = req.body.userId || req.ip;
   console.log("🧾 Contenido del mensaje recibido:", message);
 
-  res.json({ reply: `Recibido: ${message}` });
+  try {
+    const reply = await processMessage(userId, message);
+    res.json({ reply });
+  } catch (err) {
+    console.error('❌ Error al procesar el mensaje', err);
+    res.status(500).json({ reply: 'Hubo un error procesando el mensaje' });
+  }
 });
 
 
