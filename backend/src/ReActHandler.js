@@ -1,8 +1,8 @@
 const detectarIntencionEmocion = require('./modules/detectarIntencionEmocion');
 const callOpenAI = require('./modules/callOpenAI');
 
-// Memoria temporal
-const sessionMemory = new Map();
+// Memoria persistente
+const { getSessionMemory, updateSessionMemory } = require('./sessionMemory');
 
 module.exports = {
     async processMessage(userMessage) {
