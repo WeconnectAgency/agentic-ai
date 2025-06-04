@@ -2,7 +2,14 @@ import { callOpenAI } from '../callOpenAI.js';
 import { detectarIntencionEmocion } from './detectarIntencionEmocion.js';
 import { modularRespuesta } from './moduladorEmocional.js';
 import { ALMA_CONFIG } from '../config/almaConfig.js';
-import { getSessionMemory, updateSessionMemory } from './sessionMemory.js';
+import {
+  getSessionMemory,
+  updateSessionMemory,
+  registrarMensaje,
+  actualizarUltimaHora,
+  getContextoConversacion
+} from './sessionMemory.js';
+import { decidirEstrategia } from './estrategiaConversacional.js';
 
 export class ReActHandler {
   constructor() {
@@ -11,11 +18,35 @@ export class ReActHandler {
 
   async manejarMensaje(userId, userMessage) {
     const historial = await getSessionMemory(userId);
+    const contexto = await getContextoConversacion(userId);
     const analisis = await detectarIntencionEmocion(userMessage, historial);
+
+    const estrategia = decidirEstrategia(
+      analisis.intencion,
+      analisis.emocion_principal,
+      contexto
+    );
+
+    const minutosInactivo = contexto.ultimaRespuestaHora
+      ? (Date.now() - new Date(contexto.ultimaRespuestaHora).getTime()) / 60000
+      : 0;
+
+    await registrarMensaje(userId, 'user', userMessage);
+    await actualizarUltimaHora(userId);
 
     // Guardar detalles importantes
     if (analisis.detalles && Object.keys(analisis.detalles).length > 0) {
       historial.push(analisis.detalles);
+    }
+
+    if (
+      estrategia.tipoSeguimiento === 'reconectar' &&
+      minutosInactivo > estrategia.esperarMinutos
+    ) {
+      console.log('↪ Estrategia personalizada aplicada: reconectar');
+      await registrarMensaje(userId, 'assistant', estrategia.mensajeSugerido);
+      await updateSessionMemory(userId, historial);
+      return estrategia.mensajeSugerido;
     }
 
     let respuestaBase = await this.generarRespuestaConversacional(userMessage, analisis, historial);
@@ -27,6 +58,7 @@ export class ReActHandler {
       respuestaFinal = this.agregarCierreNatural(respuestaFinal, analisis);
     }
 
+    await registrarMensaje(userId, 'assistant', respuestaFinal);
     await updateSessionMemory(userId, historial);
     return respuestaFinal;
   }
