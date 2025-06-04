@@ -26,7 +26,11 @@ app.use(cors({
 app.use(express.json());
 
 app.post('/chat', async (req, res) => {
-  const { message } = req.body;
+  const { userId, message } = req.body;
+
+  if (!userId || typeof userId !== 'string') {
+    return res.status(400).json({ error: "userId requerido" });
+  }
 
   if (!message) {
     return res.status(400).json({ error: "Mensaje requerido" });
@@ -34,7 +38,7 @@ app.post('/chat', async (req, res) => {
 
   try {
     const startTime = Date.now();
-    const response = await reactHandler.manejarMensaje(message);
+    const response = await reactHandler.manejarMensaje(userId, message);
 
     // Simular tiempo de respuesta humano (1.5-3.5 segundos)
     const elapsed = Date.now() - startTime;
