@@ -5,31 +5,43 @@ import { ALMA_CONFIG } from '../config/almaConfig.js';
 
 export class ReActHandler {
   constructor() {
-    this.historial = [];
-    this.contadorCierres = 0;
+    // Mapa para almacenar la sesión de cada usuario
+    this.sesiones = new Map();
   }
 
-  async manejarMensaje(userMessage) {
-    const analisis = await detectarIntencionEmocion(userMessage, this.historial);
-    
+  /**
+   * Obtiene la sesión asociada a un usuario
+   * @param {string} userId
+   */
+  obtenerSesion(userId) {
+    if (!this.sesiones.has(userId)) {
+      this.sesiones.set(userId, { historial: [], contadorCierres: 0 });
+    }
+    return this.sesiones.get(userId);
+  }
+
+  async manejarMensaje(userId, userMessage) {
+    const sesion = this.obtenerSesion(userId);
+    const analisis = await detectarIntencionEmocion(userMessage, sesion.historial);
+
     // Guardar detalles importantes
     if (analisis.detalles && Object.keys(analisis.detalles).length > 0) {
-      this.historial.push(analisis.detalles);
+      sesion.historial.push(analisis.detalles);
     }
 
-    let respuestaBase = await this.generarRespuestaConversacional(userMessage, analisis);
-    let respuestaFinal = modularRespuesta(respuestaBase, analisis, this.historial);
-    
+    let respuestaBase = await this.generarRespuestaConversacional(userMessage, analisis, sesion.historial);
+    let respuestaFinal = modularRespuesta(respuestaBase, analisis, sesion.historial);
+
     // Estrategia de cierre progresivo
-    this.contadorCierres++;
-    if (this.contadorCierres > 2 && analisis.intencion !== 'reserva') {
+    sesion.contadorCierres++;
+    if (sesion.contadorCierres > 2 && analisis.intencion !== 'reserva') {
       respuestaFinal = this.agregarCierreNatural(respuestaFinal, analisis);
     }
 
     return respuestaFinal;
   }
 
-  async generarRespuestaConversacional(userMessage, analisis) {
+  async generarRespuestaConversacional(userMessage, analisis, historial) {
     const serviciosDisponibles = ALMA_CONFIG.SERVICIOS_ADICIONALES.map(s => s.nombre).join(', ');
     const tiposDomo = Object.keys(ALMA_CONFIG.DOMOS).map(d => `${d} ($${ALMA_CONFIG.DOMOS[d].precio})`).join(' o ');
     
@@ -50,7 +62,7 @@ Análisis del cliente:
 - Detalles: ${JSON.stringify(analisis.detalles || {})}
 
 Historial conversación (últimas 2 interacciones):
-${this.historial.slice(-2).map(h => JSON.stringify(h)).join('\n')}
+${historial.slice(-2).map(h => JSON.stringify(h)).join('\n')}
 
 Instrucciones:
 1. Usa lenguaje natural con pausas (...), contracciones y modismos
