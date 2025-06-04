@@ -3,6 +3,10 @@ import { detectarIntencionEmocion } from './detectarIntencionEmocion.js';
 import { modularRespuesta } from './moduladorEmocional.js';
 import { ALMA_CONFIG } from '../config/almaConfig.js';
 
+// Número máximo de interacciones a mantener en memoria. Ajusta con la
+// variable de entorno HISTORIAL_LIMIT o modificando el valor por defecto.
+const HISTORIAL_LIMIT = parseInt(process.env.HISTORIAL_LIMIT, 10) || 50;
+
 export class ReActHandler {
   constructor() {
     this.historial = [];
@@ -14,6 +18,9 @@ export class ReActHandler {
     
     // Guardar detalles importantes
     if (analisis.detalles && Object.keys(analisis.detalles).length > 0) {
+      // Mantener el historial acotado para evitar crecimientos de memoria cuando
+      // la BD falle. Primero recortamos y luego añadimos el nuevo detalle.
+      this.historial = this.historial.slice(-HISTORIAL_LIMIT);
       this.historial.push(analisis.detalles);
     }
 
