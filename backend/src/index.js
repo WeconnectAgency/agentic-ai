@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const twilioWebhook = require('./integrations/twilioWebhook');
+const metaWebhook = require('./integrations/metaWebhook');
 
 const app = express();
 
@@ -19,6 +21,11 @@ app.options('*', (req, res) => {
 });
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+app.post('/webhook/twilio', twilioWebhook);
+app.get('/webhook/meta', metaWebhook.verify);
+app.post('/webhook/meta', metaWebhook.handle);
 
 app.post('/message', async (req, res) => {
   console.log("📩 Se recibió una solicitud POST a /message");
