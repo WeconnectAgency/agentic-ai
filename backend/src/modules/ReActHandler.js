@@ -9,7 +9,8 @@ import {
   actualizarUltimaHora,
   getContextoConversacion
 } from './sessionMemory.js';
-import { decidirEstrategia } from './estrategiaConversacional.js';
+import estrategia from './estrategiaConversacional.js';
+const { decidirEstrategia } = estrategia;
 
 export class ReActHandler {
   constructor() {
