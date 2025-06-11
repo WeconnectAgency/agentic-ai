@@ -10,8 +10,7 @@ import {
   getContextoConversacion,
   detectarDesaparicion
 } from './sessionMemory.js';
-import estrategia from './estrategiaConversacional.js';
-const { decidirEstrategia } = estrategia;
+import { decidirEstrategia } from './estrategiaConversacional.js';
 
 export class ReActHandler {
   constructor() {

@@ -117,4 +117,4 @@ function decidirEstrategia(intencion, emocion, contexto = {}) {
   }
 }
 
-module.exports = { decidirEstrategia };
+export { decidirEstrategia };
