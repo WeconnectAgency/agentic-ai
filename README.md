@@ -28,3 +28,8 @@ The backend expects at least the following variables:
 - `APP_NAME`
 - `MONGO_URI`
 
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
