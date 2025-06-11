@@ -7,7 +7,8 @@ import {
   updateSessionMemory,
   registrarMensaje,
   actualizarUltimaHora,
-  getContextoConversacion
+  getContextoConversacion,
+  detectarDesaparicion
 } from './sessionMemory.js';
 import estrategia from './estrategiaConversacional.js';
 const { decidirEstrategia } = estrategia;
@@ -18,8 +19,13 @@ export class ReActHandler {
   }
 
   async manejarMensaje(userId, userMessage) {
+    const desaparicionInfo = await detectarDesaparicion(userId);
     const historial = await getSessionMemory(userId);
     const contexto = await getContextoConversacion(userId);
+    if (desaparicionInfo && desaparicionInfo.necesitaSeguimiento) {
+      console.log(`↪ Desaparición detectada para ${userId}`);
+      contexto.seguimiento = true;
+    }
     const analisis = await detectarIntencionEmocion(userMessage, historial);
 
     const estrategia = decidirEstrategia(
