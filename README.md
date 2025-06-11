@@ -27,6 +27,13 @@ The backend expects at least the following variables:
 - `PORT`
 - `APP_NAME`
 - `MONGO_URI`
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_USER`
+- `SMTP_PASS`
+- `GOOGLE_SHEET_ID`
+- `GOOGLE_CLIENT_EMAIL`
+- `GOOGLE_PRIVATE_KEY`
 
 
 ## License
