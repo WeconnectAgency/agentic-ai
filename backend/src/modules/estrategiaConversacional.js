@@ -1,4 +1,13 @@
-function decidirEstrategia(intencion, emocion, contexto = {}) {
+import { enviarCorreoConfirmacion } from './enviarCorreoConfirmacion.js';
+
+function pagoRealizado(contexto) {
+  const mensajes = contexto.historialMensajes || [];
+  return mensajes.some(m =>
+    m.role === 'user' && /(pago|pagado|pag\u00E9).*?(realizado|confirmado|mock)/i.test(m.mensaje)
+  );
+}
+
+async function decidirEstrategia(intencion, emocion, contexto = {}) {
   const ahora = Date.now();
   const ultima = contexto.ultimaRespuestaHora
     ? new Date(contexto.ultimaRespuestaHora).getTime()
@@ -6,6 +15,12 @@ function decidirEstrategia(intencion, emocion, contexto = {}) {
   const minutosInactivo = Math.floor((ahora - ultima) / 60000);
 
   let estrategia = null;
+
+  if (pagoRealizado(contexto)) {
+    console.log('↪ Pago confirmado detectado. Enviando correo de confirmación');
+    await enviarCorreoConfirmacion(contexto.datosReserva || {});
+    return null;
+  }
 
   // Seguimiento activo solicitado desde el contexto
   if (contexto.seguimiento === true) {

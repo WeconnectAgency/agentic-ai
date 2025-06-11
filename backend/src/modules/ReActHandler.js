@@ -29,6 +29,7 @@ export class ReActHandler {
       contexto.seguimiento = true;
     }
     const analisis = await detectarIntencionEmocion(userMessage, historial);
+    contexto.datosReserva = { ...(contexto.datosReserva || {}), ...(analisis.detalles || {}) };
 
     let disponibilidadInfo = '';
     let linkPago = '';
@@ -45,7 +46,7 @@ export class ReActHandler {
       }
     }
 
-    const estrategia = decidirEstrategia(
+    const estrategia = await decidirEstrategia(
       analisis.intencion,
       analisis.emocion_principal,
       contexto
