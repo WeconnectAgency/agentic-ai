@@ -1,4 +1,4 @@
-export function decidirEstrategia(intencion, emocion, contexto = {}) {
+function decidirEstrategia(intencion, emocion, contexto = {}) {
   const ahora = Date.now();
   const ultima = contexto.ultimaRespuestaHora
     ? new Date(contexto.ultimaRespuestaHora).getTime()
@@ -86,3 +86,5 @@ export function decidirEstrategia(intencion, emocion, contexto = {}) {
       return null;
   }
 }
+
+module.exports = { decidirEstrategia };
