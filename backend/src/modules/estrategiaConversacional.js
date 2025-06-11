@@ -5,19 +5,36 @@ function decidirEstrategia(intencion, emocion, contexto = {}) {
     : ahora;
   const minutosInactivo = Math.floor((ahora - ultima) / 60000);
 
+  let estrategia = null;
+
+  // Seguimiento activo solicitado desde el contexto
+  if (contexto.seguimiento === true) {
+    estrategia = {
+      tipoSeguimiento: 'reconectar',
+      mensajeSugerido: '¿Te sigo ayudando con tu reserva? 😊',
+      esperarMinutos: 3
+    };
+    console.log('↪ estrategia: seguimiento activo - reconectar');
+    console.log(`↪ estrategia elegida: ${estrategia.tipoSeguimiento}`);
+    return estrategia;
+  }
+
   // Caso especial: desapareció en medio de una reserva
   if (intencion === 'reserva' && minutosInactivo > 5 && contexto.desaparecido) {
-    console.log('↪ estrategia: reconectar por posible reserva perdida');
-    return {
+    estrategia = {
       tipoSeguimiento: 'reconectar',
       mensajeSugerido:
         '¿Sigues por ahí? Si necesitas ayuda con la reserva, estoy aquí 😊',
       esperarMinutos: 5
     };
+    console.log('↪ estrategia: reconectar por posible reserva perdida');
+    console.log(`↪ estrategia elegida: ${estrategia.tipoSeguimiento}`);
+    return estrategia;
   }
 
   // No realizamos seguimiento para consultas generales si la persona está ausente
   if (intencion === 'consulta_general' && contexto.desaparecido) {
+    console.log('↪ estrategia: ninguna - consulta general sin seguimiento');
     return null;
   }
 
@@ -26,63 +43,76 @@ function decidirEstrategia(intencion, emocion, contexto = {}) {
     case 'frustracion':
     case 'enfado':
       // Usuario molesto: esperar a que pida ayuda nuevamente
-      return {
+      estrategia = {
         tipoSeguimiento: 'esperar_solicitud',
         mensajeSugerido:
           'Entiendo que esto puede ser frustrante. Estoy aquí si necesitas resolverlo, sin presión 🙏',
         esperarMinutos: null
       };
+      console.log(`↪ estrategia elegida: ${estrategia.tipoSeguimiento}`);
+      return estrategia;
 
     case 'confusion':
     case 'duda':
       // Ofrecer explicación paso a paso
-      return {
+      estrategia = {
         tipoSeguimiento: 'explicacion',
         mensajeSugerido:
           'A veces puede parecer un poco confuso al principio, ¿quieres que te lo explique paso a paso?',
         esperarMinutos: 3
       };
+      console.log(`↪ estrategia elegida: ${estrategia.tipoSeguimiento}`);
+      return estrategia;
 
     case 'entusiasmo':
     case 'emocion':
       // Responder de inmediato al entusiasmo
-      return {
+      estrategia = {
         tipoSeguimiento: 'inmediato',
         mensajeSugerido:
           '¡Qué alegría que te emocione! Si ya tienes una fecha en mente, reviso la disponibilidad ya mismo 🏡✨',
         esperarMinutos: 1
       };
+      console.log(`↪ estrategia elegida: ${estrategia.tipoSeguimiento}`);
+      return estrategia;
 
     case 'ansiedad':
     case 'urgencia':
       // Atención acelerada para sentimientos de urgencia
-      return {
+      estrategia = {
         tipoSeguimiento: 'acelerado',
         mensajeSugerido:
           'Estoy aquí para ayudarte lo más rápido posible. ¿Te gustaría asegurar tu espacio ya mismo?',
         esperarMinutos: 2
       };
+      console.log(`↪ estrategia elegida: ${estrategia.tipoSeguimiento}`);
+      return estrategia;
 
     case 'desinteres':
       // Despedida amable ante falta de interés
-      return {
+      estrategia = {
         tipoSeguimiento: 'despedida_suave',
         mensajeSugerido:
           'Gracias por pasar por acá. Si en algún momento deseas escapar al bosque… aquí estaré 🌿',
         esperarMinutos: null
       };
+      console.log(`↪ estrategia elegida: ${estrategia.tipoSeguimiento}`);
+      return estrategia;
 
     case 'interes_leve':
       // Seguimiento ligero para curiosidad inicial
-      return {
+      estrategia = {
         tipoSeguimiento: 'ligero',
         mensajeSugerido:
           'Si solo estás curioseando, no hay problema 😊. ¿Quieres que te muestre algo que te pueda interesar?',
         esperarMinutos: 5
       };
+      console.log(`↪ estrategia elegida: ${estrategia.tipoSeguimiento}`);
+      return estrategia;
 
     default:
       // Sin estrategia de seguimiento definida
+      console.log('↪ estrategia: ninguna');
       return null;
   }
 }
