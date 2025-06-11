@@ -2,6 +2,15 @@
 
 This project contains a Node.js backend.
 
+## Running Tests
+
+Install dependencies and run the test suite from the `backend` folder:
+
+```bash
+cd backend
+npm test
+```
+
 ## Environment Variables
 
 1. Copy the example environment file:
