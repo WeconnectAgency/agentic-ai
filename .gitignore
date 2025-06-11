@@ -1,1 +1,20 @@
+# Ignore environment configuration
+.env
 backend/.env
+
+# Node modules directory
+node_modules/
+
+# Log files
+*.log
+
+# Test JavaScript files
+*.test.js
+
+# macOS system files
+.DS_Store
+
+# Build and cache directories
+.cache/
+build/
+dist/
