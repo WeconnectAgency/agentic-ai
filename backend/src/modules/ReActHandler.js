@@ -11,10 +11,13 @@ import {
   detectarDesaparicion
 } from './sessionMemory.js';
 import { decidirEstrategia } from './estrategiaConversacional.js';
+import { register_function, get_function } from './toolRegistry.js';
 
 export class ReActHandler {
   constructor() {
     this.contadorCierres = 0;
+    register_function('consultarDisponibilidad', this.consultarDisponibilidad.bind(this));
+    register_function('generarLinkDePago', this.generarLinkDePago.bind(this));
   }
 
   async manejarMensaje(userId, userMessage) {
@@ -26,6 +29,21 @@ export class ReActHandler {
       contexto.seguimiento = true;
     }
     const analisis = await detectarIntencionEmocion(userMessage, historial);
+
+    let disponibilidadInfo = '';
+    let linkPago = '';
+    if (analisis.intencion === 'reserva') {
+      const consultar = get_function('consultarDisponibilidad');
+      if (consultar) {
+        disponibilidadInfo = await consultar(analisis.detalles?.fechas || [], analisis.detalles?.personas || 1);
+      }
+      if (/pagar|pago|enlace|link/i.test(userMessage)) {
+        const genLink = get_function('generarLinkDePago');
+        if (genLink) {
+          linkPago = await genLink(analisis.detalles);
+        }
+      }
+    }
 
     const estrategia = decidirEstrategia(
       analisis.intencion,
@@ -57,6 +75,12 @@ export class ReActHandler {
 
     let respuestaBase = await this.generarRespuestaConversacional(userMessage, analisis, historial);
     let respuestaFinal = modularRespuesta(respuestaBase, analisis, historial);
+    if (disponibilidadInfo) {
+      respuestaFinal += ` ${disponibilidadInfo}`;
+    }
+    if (linkPago) {
+      respuestaFinal += ` ${linkPago}`;
+    }
 
     // Estrategia de cierre progresivo
     this.contadorCierres++;
@@ -129,5 +153,16 @@ Respuesta:
     ];
 
     return `${respuesta}... ${cierres[Math.floor(Math.random() * cierres.length)]}`;
+  }
+
+  async consultarDisponibilidad(fechas = [], personas = 1) {
+    const tipos = Object.keys(ALMA_CONFIG.DOMOS).join(', ');
+    const fechaTexto = fechas.join(' y ');
+    return `Disponibilidad consultada para ${fechaTexto || 'las fechas solicitadas'} en domos ${tipos}.`;
+  }
+
+  async generarLinkDePago(detalles = {}) {
+    const token = Math.random().toString(36).slice(2);
+    return `https://pago.ejemplo.com/${token}`;
   }
 }
