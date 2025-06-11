@@ -9,7 +9,6 @@ node_modules/
 *.log
 
 # Test JavaScript files
-*.test.js
 
 # macOS system files
 .DS_Store
