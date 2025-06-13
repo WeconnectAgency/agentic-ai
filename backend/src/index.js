@@ -64,16 +64,16 @@ app._router.stack.forEach((r) => {
 
 async function startServer() {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 1000 });
     console.log('✅ Connected to MongoDB');
     await initSessionMemory();
     console.log('✅ Session memory initialized');
-    app.listen(port, () => {
-      console.log(`Servidor ${process.env.APP_NAME || 'Alma Glamping'} escuchando en http://localhost:${port}`);
-    });
   } catch (err) {
     console.error('❌ MongoDB connection error:', err);
   }
+  app.listen(port, () => {
+    console.log(`Servidor ${process.env.APP_NAME || 'Alma Glamping'} escuchando en http://localhost:${port}`);
+  });
 }
 
 startServer();

@@ -7,6 +7,7 @@ import { ALMA_CONFIG } from './config/almaConfig.js';
 // Cargar variables de entorno desde el archivo localizado en ../.env
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '../.env') });
+console.log("API KEY:", process.env.OPENAI_API_KEY);
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error('OPENAI_API_KEY no definido. Verifica backend/.env');
