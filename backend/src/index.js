@@ -27,6 +27,13 @@ app.use(cors({
 app.use(express.json());
 
 app.post('/chat', async (req, res) => {
+  console.log('🔍 [POST /chat] Nueva solicitud recibida');
+  console.log('🧾 Headers:', JSON.stringify(req.headers, null, 2));
+  console.log('📩 Body:', JSON.stringify(req.body, null, 2));
+
+  if (!req.body || !req.body.mensaje) {
+    console.warn('⚠️ [POST /chat] El cuerpo de la solicitud no contiene "mensaje". Posible error de formato.');
+  }
   const { message, userId } = req.body;
 
   if (!message || !userId) {
