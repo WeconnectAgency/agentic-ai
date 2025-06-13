@@ -16,9 +16,8 @@ app.use(cors({
   origin: [
     'http://localhost:3000',
     'http://localhost:3002',
-    'http://noralbag4.sg-host.com',
-    'https://noralbag4.sg-host.com',
-    'https://agentic-frontend.onrender.com'
+    'https://agentic-frontend.onrender.com',
+    'https://bluezonepropertiescr.com'
   ],
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
