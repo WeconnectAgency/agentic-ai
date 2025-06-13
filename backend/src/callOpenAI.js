@@ -1,9 +1,12 @@
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import path from 'path';
 import { ALMA_CONFIG } from './config/almaConfig.js';
 
-// Cargar variables de entorno desde el archivo localizado en /backend/.env
-dotenv.config({ path: './backend/.env' });
+// Cargar variables de entorno desde el archivo localizado en ../.env
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error('OPENAI_API_KEY no definido. Verifica backend/.env');
