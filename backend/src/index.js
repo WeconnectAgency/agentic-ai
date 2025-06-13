@@ -3,6 +3,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import { ReActHandler } from './modules/ReActHandler.js';
 import { initSessionMemory } from './modules/sessionMemory.js';
+import chatRoutes from './routes/chat.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -25,39 +26,9 @@ app.use(cors({
 }));
 
 app.use(express.json());
+console.log('✅ express.json() activado para analizar cuerpos de solicitud JSON');
 
-app.post('/chat', async (req, res) => {
-  console.log('🔍 [POST /chat] Nueva solicitud recibida');
-  console.log('🧾 Headers:', JSON.stringify(req.headers, null, 2));
-  console.log('📩 Body:', JSON.stringify(req.body, null, 2));
-
-  if (!req.body || !req.body.mensaje) {
-    console.warn('⚠️ [POST /chat] El cuerpo de la solicitud no contiene "mensaje". Posible error de formato.');
-  }
-  const { message, userId } = req.body;
-
-  if (!message || !userId) {
-    return res.status(400).json({ error: "Mensaje y userId requeridos" });
-  }
-
-  try {
-    const startTime = Date.now();
-    const response = await reactHandler.manejarMensaje(userId, message);
-
-    // Simular tiempo de respuesta humano (1.5-3.5 segundos)
-    const elapsed = Date.now() - startTime;
-    const minDelay = 1500;
-    const delay = Math.max(minDelay - elapsed, 0) + Math.random() * 2000;
-
-    setTimeout(() => {
-      res.json({ response });
-    }, delay);
-
-  } catch (error) {
-    console.error("Error en endpoint /chat:", error);
-    res.status(500).json({ error: "Error procesando mensaje" });
-  }
-});
+app.use('/chat', chatRoutes);
 
 // Opcional: mostrar rutas registradas
 console.log("✅ Rutas registradas:");
