@@ -1,6 +1,7 @@
 import { callOpenAI } from '../callOpenAI.js';
 import { detectarIntencionEmocion } from './detectarIntencionEmocion.js';
 import { modularRespuesta } from './moduladorEmocional.js';
+import { ajustarPrompt } from './moduladorNarrativo.js';
 import { ALMA_CONFIG } from '../config/almaConfig.js';
 import {
   getSessionMemory,
@@ -8,7 +9,8 @@ import {
   registrarMensaje,
   actualizarUltimaHora,
   getContextoConversacion,
-  detectarDesaparicion
+  detectarDesaparicion,
+  obtenerMensajes
 } from './sessionMemory.js';
 import { decidirEstrategia } from './estrategiaConversacional.js';
 import { register_function, get_function } from './toolRegistry.js';
@@ -24,6 +26,7 @@ export class ReActHandler {
     const desaparicionInfo = await detectarDesaparicion(userId);
     const historial = await getSessionMemory(userId);
     const contexto = await getContextoConversacion(userId);
+    const mensajes = await obtenerMensajes(userId);
     if (desaparicionInfo && desaparicionInfo.necesitaSeguimiento) {
       console.log(`↪ Desaparición detectada para ${userId}`);
       contexto.seguimiento = true;
@@ -74,7 +77,7 @@ export class ReActHandler {
       return estrategia.mensajeSugerido;
     }
 
-    let respuestaBase = await this.generarRespuestaConversacional(userMessage, analisis, historial);
+    let respuestaBase = await this.generarRespuestaConversacional(userMessage, analisis, historial, mensajes);
     let respuestaFinal = modularRespuesta(respuestaBase, analisis, historial);
     if (disponibilidadInfo) {
       respuestaFinal += ` ${disponibilidadInfo}`;
@@ -94,7 +97,7 @@ export class ReActHandler {
     return respuestaFinal;
   }
 
-  async generarRespuestaConversacional(userMessage, analisis, historial) {
+  async generarRespuestaConversacional(userMessage, analisis, historial, mensajes = []) {
     const serviciosDisponibles = ALMA_CONFIG.SERVICIOS_ADICIONALES.map(s => s.nombre).join(', ');
     const tiposDomo = Object.keys(ALMA_CONFIG.DOMOS).map(d => `${d} ($${ALMA_CONFIG.DOMOS[d].precio})`).join(' o ');
 
@@ -129,8 +132,8 @@ Cliente dice: "${userMessage}"
 
 Respuesta:
     `;
-
-    return await callOpenAI(prompt, 0.7, 150);
+    const promptFinal = ajustarPrompt(prompt, mensajes);
+    return await callOpenAI(promptFinal, 0.7, 150);
   }
 
   obtenerEstrategiaVenta(analisis) {
