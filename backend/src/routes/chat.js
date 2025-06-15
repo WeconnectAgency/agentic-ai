@@ -1,8 +1,9 @@
 import express from 'express';
+import { callOpenAI } from '../callOpenAI.js';
 
 const router = express.Router();
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   console.log('🛬 [POST /chat] Solicitud recibida');
 
   try {
@@ -25,7 +26,16 @@ router.post('/', (req, res) => {
   }
 
   const { mensaje } = req.body;
-  res.json({ ok: true, mensaje });
+
+  try {
+    const respuesta = await callOpenAI(mensaje);
+    return res.json({ ok: true, mensaje: respuesta });
+  } catch (err) {
+    console.error('💥 Error generando respuesta de OpenAI:', err.message);
+    return res.status(500).json({
+      error: 'Error interno al generar respuesta'
+    });
+  }
 });
 
 export default router;
