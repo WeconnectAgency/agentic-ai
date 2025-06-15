@@ -10,17 +10,18 @@ router.post('/', (req, res) => {
 
     if (!req.body || !req.body.mensaje) {
       console.warn('⚠️ El campo "mensaje" está vacío o no existe.');
-      return res
-        .status(200)
-        .json({ error: 'Mensaje no proporcionado', body: req.body });
+      return res.status(200).json({
+        error: 'Mensaje no proporcionado',
+        body: req.body
+      });
     }
 
-    // continuar con el procesamiento real...
+    // Aquí seguiría la lógica normal del agente...
   } catch (err) {
     console.error('💥 Error procesando body:', err.message);
-    return res
-      .status(500)
-      .json({ error: 'Error interno al procesar el body' });
+    return res.status(500).json({
+      error: 'Error interno al procesar el body'
+    });
   }
 
   const { mensaje } = req.body;
