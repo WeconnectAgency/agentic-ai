@@ -1,6 +1,6 @@
 import { ALMA_CONFIG } from '../config/almaConfig.js';
 
-export function modularRespuesta(respuestaBase, analisis, historial = []) {
+export function modularRespuesta(respuestaBase, analisis, historial = [], mensajes = []) {
   // Técnicas avanzadas de humanización
   const humanizar = {
     pausasNaturales: () => respuestaBase.replace(/\. /g, "... "),
@@ -39,9 +39,11 @@ export function modularRespuesta(respuestaBase, analisis, historial = []) {
   respuesta = humanizar.contracciones(respuesta);
   respuesta = humanizar.imperfeccionesControladas(respuesta);
   respuesta = humanizar.memoriaConversacional(respuesta);
-  
-  // Añadir modismos locales
-  if (Math.random() < 0.4) {
+
+  // Añadir modismos locales de forma estratégica
+  const modismoRegex = /(pura vida|que chiva)/i;
+  const modismoUsado = mensajes.some(m => m.de === 'alma' && modismoRegex.test(m.texto));
+  if (!modismoUsado && Math.random() < 0.4) {
     const modismos = [ALMA_CONFIG.MODISMO_1, ALMA_CONFIG.MODISMO_2, "¡Tuanis!"];
     respuesta = modismos[Math.floor(Math.random() * modismos.length)] + " " + respuesta;
   }

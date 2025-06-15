@@ -3,6 +3,7 @@ import { detectarIntencionEmocion } from './detectarIntencionEmocion.js';
 import { modularRespuesta } from './moduladorEmocional.js';
 import { ajustarPrompt } from './moduladorNarrativo.js';
 import { ALMA_CONFIG } from '../config/almaConfig.js';
+import { filtrarRespuestaFinal } from './filtrarRespuestaFinal.js';
 import {
   getSessionMemory,
   updateSessionMemory,
@@ -78,7 +79,7 @@ export class ReActHandler {
     }
 
     let respuestaBase = await this.generarRespuestaConversacional(userMessage, analisis, historial, mensajes);
-    let respuestaFinal = modularRespuesta(respuestaBase, analisis, historial);
+    let respuestaFinal = modularRespuesta(respuestaBase, analisis, historial, mensajes);
     if (disponibilidadInfo) {
       respuestaFinal += ` ${disponibilidadInfo}`;
     }
@@ -91,6 +92,8 @@ export class ReActHandler {
     if (this.contadorCierres > 2 && analisis.intencion !== 'reserva') {
       respuestaFinal = this.agregarCierreNatural(respuestaFinal, analisis);
     }
+
+    respuestaFinal = filtrarRespuestaFinal(respuestaFinal, mensajes);
 
     await registrarMensaje(userId, 'assistant', respuestaFinal);
     await updateSessionMemory(userId, historial);
